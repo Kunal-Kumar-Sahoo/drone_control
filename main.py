@@ -1,50 +1,39 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+from drone import Drone
+from pid_controller import PIDController
+from animation import DroneAnimation
 
+# Define constants
+g = 9.81  # Acceleration due to gravity (m/s^2)
+m = 1.0   # Mass of the drone (kg)
 
-# Parameters
-dt = 0.01
-g = 9.81
-m = 0.1
+# PID parameters
+kp = 1.0
+ki = 0.001
+kd = 0.5
+
+# Simulation parameters
+dt = 0.01   # Time step for simulation
+total_time = 10.0  # Total simulation time
 
 # Initial conditions
-x = np.array([0, 0, 0], dtype=np.float32)
-v = np.array([0, 0, 0], dtype=np.float32)
+x = np.array([0.0, 0.0, 0.0])  # Initial position (m)
+v = np.array([0.0, 0.0, 0.0])  # Initial velocity (m/s)
+u = np.array([0.0, 0.0, 0.0])  # Initial control input (thrust)
 
-# Forces
-gravity = lambda: np.array([0, 0, -m * g])
+# Reference point
+ref_point = np.array([4.0, 3.0, 5.0])  # Reference point (m)
 
-thrust = lambda: np.array([0, 0, m * g * 1.1])
+# Create drone and PID controller objects
+drone = Drone(mass=m)
+controller = PIDController(kp=kp, ki=ki, kd=kd)
 
-# Dynamics
-def update_dynamics():
-    global x, v
-    a = (gravity() + thrust()) / m
-    v += a * dt
-    x += v * dt
-
-# Function to update the plot
-def update_plot(frame, ax, drone):
-    update_dynamics()
-    drone.set_data(x[0], x[1])
-    drone.set_3d_properties(x[2])
-    return drone,
-
-# Create figure and axis
+# Create animation object and animate
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
+ax.scatter(ref_point[0], ref_point[1], ref_point[2], c='r', label='Reference Point')
+line, = ax.plot([x[0]], [x[1]], [x[2]], marker='o', color='b', label='Drone')
 
-# Set axis limits
-ax.set_xlim([-2, 2])
-ax.set_ylim([-2, 2])
-ax.set_zlim([0, 4])
-
-# Create drone
-drone,= ax.plot([], [], [], 'bo')
-
-# Animation
-ani = FuncAnimation(fig, update_plot, frames=200, fargs=(ax, drone), blit=True, interval=dt*1000)
-
-plt.show()
+animation = DroneAnimation(drone, controller, ref_point, total_time, dt, line)
+animation.animate()
