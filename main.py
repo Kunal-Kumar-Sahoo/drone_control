@@ -54,11 +54,32 @@ def visualize_performance(animation):
 
     # Plotting
     plt.figure()
+    plt.title('Drone Performance Analysis')
+
+    plt.subplot(131)
     plt.plot(time, drone_trajectory[:, 0], label='Drone X Position')
     plt.plot(time, ref_trajectory[:, 0], '--', label='Reference X Position')
     plt.xlabel('Time (s)')
     plt.ylabel('X Position (m)')
-    plt.title('Drone Performance Analysis')
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(132)
+    plt.plot(time, drone_trajectory[:, 1], label='Drone Y Position')
+    plt.plot(time, ref_trajectory[:, 1], '--', label='Reference Y Position')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Y Position (m)')
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(133)
+    plt.plot(time, drone_trajectory[:, 2], label='Drone Z Position')
+    plt.plot(time, ref_trajectory[:, 2], '--', label='Reference Z Position')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Z Position (m)')
+    plt.legend()
+    plt.grid(True)
+
     plt.legend()
     plt.grid(True)
     plt.show()
