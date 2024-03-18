@@ -10,6 +10,8 @@ class DroneAnimation:
         self.total_time = total_time
         self.dt = dt
         self.line = line
+        self.drone_trajectory = []  # Store drone's trajectory
+        self.ref_trajectory = []    # Store reference trajectory
 
     def update_plot(self, frame):
         error = self.ref_point - self.drone.position
@@ -18,6 +20,8 @@ class DroneAnimation:
         self.drone.update_position(self.dt)
         self.line.set_data(self.drone.position[0], self.drone.position[1])
         self.line.set_3d_properties(self.drone.position[2])
+        self.drone_trajectory.append(self.drone.position.copy())  # Store drone's position
+        self.ref_trajectory.append(self.ref_point.copy())          # Store reference position
         return self.line,
 
     def animate(self):
