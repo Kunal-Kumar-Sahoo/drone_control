@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from drone import Drone
 from pid_controller import PIDController
 from animation import DroneAnimation
+from controller import Controller
 
 def main():
     # Define constants
@@ -11,8 +12,8 @@ def main():
 
     # PID parameters
     kp = 1.0
-    ki = 0.001
-    kd = 0.5
+    ki = 0.0001
+    kd = 0.9
 
     # Simulation parameters
     dt = 0.01   # Time step for simulation
@@ -26,9 +27,11 @@ def main():
     # Reference point
     ref_point = np.array([4.0, 3.0, 5.0])  # Reference point (m)
 
-    # Create drone and PID controller objects
+    # Create drone object
     drone = Drone(mass=m)
-    controller = PIDController(kp=kp, ki=ki, kd=kd)
+
+    # Create PID controller object
+    controller = PIDController(kp=kp, ki=ki, kd=kd, ref_point=ref_point)
 
     # Create animation object and animate
     fig = plt.figure()
@@ -40,10 +43,9 @@ def main():
     ani = animation.animate()
 
     # Show the animation
-    plt.title('Drone Motion Animation')
-    plt.show()
+    # plt.title('Drone Motion Animation')
+    # plt.show()
 
-    # Visualize performance of the controller
     visualize_performance(animation)
 
 def visualize_performance(animation):
@@ -80,9 +82,7 @@ def visualize_performance(animation):
     plt.legend()
     plt.grid(True)
 
-    plt.legend()
-    plt.grid(True)
     plt.show()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

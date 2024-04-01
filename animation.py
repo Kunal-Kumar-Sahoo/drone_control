@@ -14,21 +14,53 @@ class DroneAnimation:
         self.ref_trajectory = []    # Store reference trajectory
 
     def update_plot(self, frame):
-        error = self.ref_point - self.drone.position
-        control_input = self.controller.compute_control(error, self.dt)
+
+        control_input = self.controller.compute_control(self.drone.position, self.dt)
         self.drone.thrust = control_input
         self.drone.update_position(self.dt)
         self.line.set_data(self.drone.position[0], self.drone.position[1])
         self.line.set_3d_properties(self.drone.position[2])
-        self.drone_trajectory.append(self.drone.position.copy())  # Store drone's position
-        self.ref_trajectory.append(self.ref_point.copy())          # Store reference position
-        return self.line,
+
+        # Update arms position
+        arm_length = 0.5  # Length of the arms
+        arm_positions = np.array([
+            [self.drone.position[0] + arm_length, self.drone.position[1], self.drone.position[2]],
+            [self.drone.position[0] - arm_length, self.drone.position[1], self.drone.position[2]],
+            [self.drone.position[0], self.drone.position[1] + arm_length, self.drone.position[2]],
+            [self.drone.position[0], self.drone.position[1] - arm_length, self.drone.position[2]]
+        ])
+
+        # Update arms
+        for i in range(len(self.arms)):
+            self.arms[i].set_data([self.drone.position[0], arm_positions[i, 0]], [self.drone.position[1], arm_positions[i, 1]])
+            self.arms[i].set_3d_properties([self.drone.position[2], arm_positions[i, 2]])
+
+        # Store drone's position
+        self.drone_trajectory.append(self.drone.position.copy())
+        self.ref_trajectory.append(self.ref_point.copy())
+
+        return self.line, *self.arms
 
     def animate(self):
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(self.ref_point[0], self.ref_point[1], self.ref_point[2], c='r', label='Reference Point')
         self.line, = ax.plot([self.drone.position[0]], [self.drone.position[1]], [self.drone.position[2]], marker='o', color='b', label='Drone')
+
+        # Initialize arms
+        arm_length = 0.5
+        arm_positions = np.array([
+            [self.drone.position[0] + arm_length, self.drone.position[1], self.drone.position[2]],
+            [self.drone.position[0] - arm_length, self.drone.position[1], self.drone.position[2]],
+            [self.drone.position[0], self.drone.position[1] + arm_length, self.drone.position[2]],
+            [self.drone.position[0], self.drone.position[1] - arm_length, self.drone.position[2]]
+        ])
+
+        self.arms = []
+        for i in range(len(arm_positions)):
+            arm, = ax.plot([self.drone.position[0], arm_positions[i, 0]], [self.drone.position[1], arm_positions[i, 1]], [self.drone.position[2], arm_positions[i, 2]], color='g')
+            self.arms.append(arm)
+
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
@@ -36,6 +68,7 @@ class DroneAnimation:
         ax.set_ylim(0, 10)
         ax.set_zlim(0, 10)
         ax.legend()
+
         ani = FuncAnimation(fig, self.update_plot, frames=np.arange(0, self.total_time, self.dt), interval=self.dt*1000, blit=True)
         plt.title('Drone Motion Animation')
         plt.show()
